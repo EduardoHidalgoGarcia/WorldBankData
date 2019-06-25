@@ -6,7 +6,6 @@ output:
   pdf_document:
     toc: true
     toc_depth: 3
-    fig_caption: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -127,10 +126,10 @@ Rebasing of national accounts can alter the measured growth rate of an economy a
 
 To obtain comparable series of constant price data for computing aggregates, the World Bank rescales GDP and value added by industrial origin to a common reference year. Because rescaling changes the implicit weights used in forming regional and income group aggregates, aggregate growth rates are not comparable with those from earlier editions with different base years. Rescaling may result in a discrepancy between the rescaled GDP and the sum of the rescaled components. To avoid distortions in the growth rates, the discrepancy is left unallocated. As a result, the weighted average of the growth rates of the components generally does not equal the GDP grow
 
- In `r t.ref("gdp")` I report the averages for the current century.
+ `r t.ref("gdp_table")` reports the averages for the current century.
 
 ```{r gdp, echo=FALSE, fig.cap=table_captions("gdp_table", "Summary of Indicators 2000 - 2016")}
-knitr::kable(statis%>%filter(`Series Name`=="GDP (constant 2010 US$)") %>% mutate(Mean=prettyNum(Mean/1000000000,big.mark=",",scientific=FALSE,digits=1), SD = prettyNum(SD/1000000000,big.mark=",",scientific=FALSE,digits=1)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`), format="markdown",  align = c('l','r','r'),caption = "GDP (constant 2010 US$ '000 M)")
+knitr::kable(statis%>%filter(`Series Name`=="GDP (constant 2010 US$)") %>% mutate(Mean=prettyNum(Mean/1000000000,big.mark=",",scientific=FALSE,digits=1), SD = prettyNum(SD/1000000000,big.mark=",",scientific=FALSE,digits=1)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`),  align = c('l','r','r'),caption = "GDP (constant 2010 US$ '000 M)")
 
 ```
 
@@ -139,7 +138,7 @@ knitr::kable(statis%>%filter(`Series Name`=="GDP (constant 2010 US$)") %>% mutat
 In `r f.ref("GDP_graph")` it is possible to see the *GDP trend* from the current century.
 	
 
-```{r GDP_graph,warning=FALSE,results='hide',message=FALSE, fig.cap=figure_captions("GDP_graph", "GDP (constant 2010 US$)")}
+```{r ,warning=FALSE,results='hide',message=FALSE, fig.cap="GDP (constant 2010 US$)"}
 
 ggplot(data=md%>%filter(`Series Name`=="GDP (constant 2010 US$)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(label = unit_format(unit = "K M", scale = 1e-9)) + labs(y="GDP",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), "")))) #,fig.keep='all'
