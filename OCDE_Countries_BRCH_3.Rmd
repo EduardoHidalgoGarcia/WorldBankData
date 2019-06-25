@@ -133,22 +133,24 @@ knitr::kable(statis%>%filter(`Series Name`=="GDP (constant 2010 US$)") %>% mutat
 
 ```
 
- \newpage
+\newpage
 
-In `r f.ref("GDP_graph")` it is possible to see the *GDP trend* from the current century.
+In `r f.ref("GDP_graph")` it is possible to see the *GDP trend* from the current century. In the `r f.ref("GDP_graph_AGGR")` it is possible to see the trend for the biggest countries and regions of the world
 	
 
-```{r ,warning=FALSE,results='hide',message=FALSE, fig.cap="GDP (constant 2010 US$)"}
+```{r GDP_graph,warning=FALSE,results='hide',message=FALSE, fig.cap="GDP (constant 2010 US$)"}
 
 ggplot(data=md%>%filter(`Series Name`=="GDP (constant 2010 US$)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(label = unit_format(unit = "K M", scale = 1e-9)) + labs(y="GDP",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), "")))) #,fig.keep='all'
 ```
 
-```{r GDP_graph_AGGR,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+```{r GDP_graph_AGGR,warning=FALSE,results='hide',message=FALSE,fig.keep='all', fig.cap="GDP (constant 2010 US$) Regions and Biggest Countries"}
 
 ggplot(data=md%>%filter(`Series Name`=="GDP (constant 2010 US$)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(label = unit_format(unit = "B", scale = 1e-12,accuracy = 0.1)) + labs(y="GDP",x="Time") + theme_bw(base_size = 8)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
 ```
+
+\newpage
 
 ## GDP growth (annual %)
 
@@ -160,6 +162,8 @@ knitr::kable(statis%>%filter(`Series Name`=="GDP growth (annual %)")%>% mutate(M
 ```{r gdpgrowhtgraph, echo=FALSE,warning=FALSE}
 md %>% filter(`Series Name`=="GDP growth (annual %)") %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="GDP growth (annual %)",x="Country Code") + theme_bw(base_size = 8)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="GDP growth (annual %)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
 ```
+
+\newpage
 
 ## GDP per capita (constant 2010 US$)
 
@@ -178,6 +182,8 @@ ggplot(data=md%>%filter(`Series Name`=="GDP per capita (constant 2010 US$)" & (`
 ggplot(data=md%>%filter(`Series Name`=="GDP per capita (constant 2010 US$)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::comma) + labs(y="GDP per capita (constant 2010 US$)",x="Time") + theme_bw(base_size = 8)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
 ```
+
+\newpage
 
 ## GDP per capita growth (annual %)
 
@@ -201,6 +207,8 @@ ggplot(data=md%>%filter(`Series Name`=="GDP per capita growth (annual %)" & (`Co
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
 #labels = scales::number_format(accuracy = 0.01)
 ```
+
+\newpage
 
 ## GDP per person employed (constant 2011 PPP $)
 
@@ -226,7 +234,7 @@ ggplot(data=md%>%filter(`Series Name`=="GDP per person employed (constant 2011 P
 ```
 
 
-
+\newpage
 
 ## GNI (constant 2010 US$)
 
@@ -255,6 +263,8 @@ ggplot(data=md%>%filter(`Series Name`=="GNI (constant 2010 US$)" & (`Country Nam
 #labels = scales::number_format(accuracy = 0.01)
 ```
 
+\newpage
+
 ## GNI growth (annual %)
 
 ```{r }
@@ -279,6 +289,8 @@ ggplot(data=md%>%filter(`Series Name`=="GNI growth (annual %)" & (`Country Name`
 #labels = scales::number_format(accuracy = 0.01)
 ```
 
+\newpage
+
 ## GNI per capita (constant 2010 US$)
 
 ## Income share held by subgroups of population
@@ -301,6 +313,8 @@ Survey year is the year in which the underlying household survey data were colle
 
 Percentage shares by quintile may not sum to 100 because of rounding.
 
+\newpage
+
 ### Income share held by lowest 10%
 
 
@@ -321,6 +335,8 @@ ggplot(data=md%>%filter(`Series Name`=="Income share held by lowest 10%" & (`Cou
 md %>% filter(`Series Name`=="Income share held by lowest 10%" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Income share held by lowest 10%",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Income share held by lowest 10%")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
 ```
 
+\newpage
+
 ### Income share held by lowest 20%
 
 ```{r, }
@@ -334,6 +350,7 @@ ggplot(data=md%>%filter(`Series Name`=="Income share held by lowest 20%" & (`Cou
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))+scale_y_continuous(labels = scales::comma)
 ```
 
+\newpage
 
 ### Income share held by second 20%
 
@@ -352,6 +369,8 @@ ggplot(data=md%>%filter(`Series Name`=="Income share held by second 20%" & (`Cou
 md %>% filter(`Series Name`=="Income share held by lowest 20%" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Income share held by lowest 20%",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Income share held by bottom 20%")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
 ```
 
+\newpage
+
 ### Income share held by third 20%
 
 ```{r, }
@@ -368,6 +387,8 @@ ggplot(data=md%>%filter(`Series Name`=="Income share held by third 20%" & (`Coun
 ```{r thirdtwentypercentgraph_2, echo=FALSE,warning=FALSE}
 md %>% filter(`Series Name`=="Income share held by third 20%" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Income share held by third 20%",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Income share held by third 20%")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
 ```
+
+\newpage
 
 ### Income share held by fourth 20%
 
@@ -387,7 +408,7 @@ ggplot(data=md%>%filter(`Series Name`=="Income share held by fourth 20%" & (`Cou
 md %>% filter(`Series Name`=="Income share held by fourth 20%" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Income share held by fourth 20%",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Income share held by fourth 20%")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
 ```
 
-
+\newpage
 
 ### Income share held by highest 20%
 
@@ -406,6 +427,8 @@ ggplot(data=md%>%filter(`Series Name`=="Income share held by highest 20%" & (`Co
 md %>% filter(`Series Name`=="Income share held by highest 20%" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Income share held by highest 20%",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Income share held by highest 20%")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
 ```
 
+\newpage
+
 ### Income share held by highest 10%
 
 ```{r, top 10 percent}
@@ -422,6 +445,8 @@ ggplot(data=md%>%filter(`Series Name`=="Income share held by highest 10%" & (`Co
 ```{r bottomtenpercentgraph_1, echo=FALSE,warning=FALSE}
 md %>% filter(`Series Name`=="Income share held by highest 10%" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Income share held by highest 10%",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Income share held by highest 10%")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
 ```
+
+\newpage
 
 ## GDP & GNI per Capita estimations
 
@@ -448,6 +473,7 @@ p <- ggplot(data = cumulative_share, aes(x = `Country Code`, y = Mean)) +
 p +  geom_text(aes(y = cumulative_contry, label =Mean, group =Share), color = "black",size=1.5)+ scale_fill_manual(values = c("#d95f0e","#2ca25f","#99d8c9", "#9ecae1","#3182bd"))
 ```
 
+\newpage
 
 ### Lowest 10% 
 
@@ -466,6 +492,7 @@ auxiliar5<-inner_join(auxiliar1,auxiliar2,by = "Country Name") %>% inner_join(au
 knitr::kable(auxiliar5, caption = "Per Capita estimations (Lowest 10%)",align = c('l','r','r','c','r'))
 ```
 
+\newpage
 
 ### Lowest 20% (1st quintile)
 
@@ -482,6 +509,7 @@ auxiliar5<-inner_join(auxiliar1,auxiliar2,by = "Country Name") %>% inner_join(au
 knitr::kable(auxiliar5, caption = "Per Capita estimations (Lowest 20%)",align = c('l','r','r','c','r'))
 ```
 
+\newpage
 
 ### Second 20% (2nd quintile)
 
@@ -498,6 +526,8 @@ auxiliar5<-inner_join(auxiliar1,auxiliar2,by = "Country Name") %>% inner_join(au
 knitr::kable(auxiliar5, caption = "Per Capita estimations (Second 20%)",align = c('l','r','r','c','r'))
 ```
 
+\newpage
+
 ### Third 20% (3rd quintile)
 
 ```{r}
@@ -511,6 +541,8 @@ auxiliar4<-statis%>%filter(`Series Name`=="GNI (constant 2010 US$)") %>% ungroup
 auxiliar5<-inner_join(auxiliar1,auxiliar2,by = "Country Name") %>% inner_join(auxiliar3,by="Country Name") %>% inner_join(auxiliar4,by="Country Name") %>%mutate(`GDP x Capita`=prettyNum(GDP*IncomeShareTopTenpercent/(Population*.2),big.mark=",",scientific=FALSE,digits=0),`GNI x Capita`=prettyNum(GNI*IncomeShareTopTenpercent/(Population*.2),big.mark=",",scientific=FALSE,digits=0),`GDP Share '000 M`=prettyNum(GDP*IncomeShareTopTenpercent/1000000000,big.mark=",",scientific=FALSE,digits=1),`Income share held`=percent(IncomeShareTopTenpercent),`Pop (#)`=prettyNum(Population*.1,big.mark=",",scientific=FALSE,digits=0))%>%select(-Population,-GDP,-GNI,-IncomeShareTopTenpercent,-`GDP Share '000 M`)
 knitr::kable(auxiliar5, caption = "Per Capita estimations (Third 20%)",align = c('l','r','r','c','r'))
 ```
+
+\newpage
 
 ### Fourth 20% (4th quintile)
 
@@ -526,6 +558,7 @@ auxiliar5<-inner_join(auxiliar1,auxiliar2,by = "Country Name") %>% inner_join(au
 knitr::kable(auxiliar5, caption = "Per Capita estimations (Fourth 20%)",align = c('l','r','r','c','r'))
 ```
 
+\newpage
 
 ### Highest 20% (5th quintile)
 
@@ -542,7 +575,7 @@ knitr::kable(auxiliar5, caption = "Per Capita estimations (Fifth 20%)",align = c
 ```
 
 
-
+\newpage
 
 ### Highest 10% 
 
@@ -560,7 +593,7 @@ knitr::kable(auxiliar5, caption = "Per Capita estimations (Highest 10%)",align =
 ```
 
 
-
+\newpage
 
 ## GDP and Population
 
@@ -628,7 +661,7 @@ auxiliar5<-inner_join(auxiliar1,auxiliar2,by = "Country Name") %>% inner_join(au
 
 populationgrowth<-md%>%filter(`Series Name`=="Population, total") %>% group_by(`Country Name`) %>% mutate(populationgrowth = (value - lag(value))/lag(value))%>%filter(`Country Name`==country)%>%group_by()%>%summarise(populationgrowth=mean(populationgrowth,na.rm = TRUE))%>%as.double()
 
-GDPgrowth<-md%>%filter(`Series Name`=="GDP per capita growth (annual %)"& `Country Name`==country) %>% group_by(`Country Name`)%>%group_by()%>%summarise(GDPgrowthmean=mean(value,na.rm = TRUE))%>%as.double()
+GDPgrowth<-md%>%filter(`Series Name`=="GDP growth (annual %)"& `Country Name`==country) %>% group_by(`Country Name`)%>%group_by()%>%summarise(GDPgrowthmean=mean(value,na.rm = TRUE))%>%as.double()
 
 gdp_x_capita_actual<-md%>%filter(`Series Name`=="GDP per capita (constant 2010 US$)"& `Country Name`==country & !is.na(value))%>%select(value)%>%tail( n=1)%>%as.double()
 
