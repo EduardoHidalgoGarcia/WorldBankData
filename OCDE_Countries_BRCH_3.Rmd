@@ -86,7 +86,7 @@ statis<-md%>%filter(!is.na(`Country Code`) | !is.na(`Series Name`))%>%dplyr::gro
 
 # Summary
 
-This document aims to consolidate available indicators as a sandbox tool for next analysis. For an easy to use approach I have splited each indicator into the following categories:
+This document aims to consolidate available indicators as a *sandbox* tool for next analysis. For an easy to use approach I have splited each indicator into the following categories:
 
 + Economy
 + Goverment
@@ -101,6 +101,16 @@ For this document I focused on the OCDE Countries plus China and Brazil.
 Database extracted from: https://databank.worldbank.org/data/source/world-development-indicators#
 
 Country list from: https://www.oecd.org/about/members-and-partners/
+
+After each indicator I have copied **World Bank's** metadata including:
+
++ Long Description
++ Source (when needed)
++ Statistical Concept & Methodology (when needed)
++ Limitations & Exceptions (when needed)
+
+The extraction period is from 2000 to the last available date (in most cases 2017). Looking forward to an standarized presentation for each indicator first I present a table with the summary of average and standard deviation then followed by a box plot graph. When possible I also present graphs wiht the time series of the indicator for each of the countries. Finally, I aggregate the countries into region time series to see region's trends and compare them with the three biggest economies (United States, China and Japan).
+
 
 # Economy
 
@@ -953,8 +963,6 @@ do.call(grid.arrange,  graphslist)
 
 Interest rate spread is the interest rate charged by banks on loans to private sector customers minus the interest rate paid by commercial or similar banks for demand, time, or savings deposits. The terms and conditions attached to these rates differ by country, however, limiting their comparability.
 
-## Statistical concept and methodology
-
 The interest rate spread - the margin between the cost of mobilizing liabilities and the earnings on assets - measures financial sector efficiency in intermediation. A narrow spread means low transaction costs, which reduces the cost of funds for investment, crucial to economic growth.
 
 ```{r Interestratespread }
@@ -968,8 +976,6 @@ md %>% filter(`Series Name`=="Interest rate spread (lending rate minus deposit r
 ## Deposit interest rate (%)
 
 Deposit interest rate is the rate paid by commercial or similar banks for demand, time, or savings deposits. The terms and conditions attached to these rates differ by country, however, limiting their comparability.
-
-## Statistical concept and methodology
 
 Many interest rates coexist in an economy, reflecting competitive conditions, the terms governing loans and deposits, and differences in the position and status of creditors and debtors. In some economies interest rates are set by regulation or administrative fiat. In economies with imperfect markets, or where reported nominal rates are not indicative of effective rates, it may be difficult to obtain data on interest rates that reflect actual market transactions. Deposit and lending rates are collected by the International Monetary Fund (IMF) as representative interest rates offered by banks to resident customers. The terms and conditions attached to these rates differ by country, however, limiting their comparability.
 
@@ -1015,6 +1021,294 @@ ggplot(data=md%>%filter(`Series Name`=="Bank capital to assets ratio (%)" & (`Co
 
 ```{r banktoassetratio_graph2, echo=FALSE,warning=FALSE}
 md %>% filter(`Series Name`=="Bank capital to assets ratio (%)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Inflation, consumer prices (annual %)",x="Country Code") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Bank capital to assets ratio (%)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+## Current account balance (% of GDP)
+
+Current account balance is the sum of net exports of goods and services, net primary income, and net secondary income.
+
+```{r, cab}
+
+# Goods and services expense (% of expense)
+
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Current account balance (% of GDP)"  & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Current account balance (% of GDP)")
+```
+
+
+```{r}
+md %>% filter(`Series Name`=="Current account balance (% of GDP)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Current account balance (% of GDP)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Current account balance (% of GDP)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Current account balance (% of GDP)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Current account balance (% of GDP)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Current account balance (% of GDP)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Current account balance (% of GDP)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+## Domestic credit to private sector (% of GDP)
+
+Domestic credit to private sector refers to financial resources provided to the private sector by financial corporations, such as through loans, purchases of nonequity securities, and trade credits and other accounts receivable, that establish a claim for repayment. For some countries these claims include credit to public enterprises. The financial corporations include monetary authorities and deposit money banks, as well as other financial corporations where data are available (including corporations that do not accept transferable deposits but do incur such liabilities as time and savings deposits). Examples of other financial corporations are finance and leasing companies, money lenders, insurance corporations, pension funds, and foreign exchange companies.
+
+Credit is an important link in money transmission; it finances production, consumption, and capital formation, which in turn affect economic activity. The data on domestic credit provided to the private sector are taken from the financial corporations survey (line 52D) of the International Monetary Fund's (IMF) International Financial Statistics or, when unavailable, from its depository survey (line 32D). The banking sector includes monetary authorities (the central bank) and deposit money banks, as well as other financial corporations where data are available (including institutions that do not accept transferable deposits but do incur such liabilities as time and savings deposits). Examples of other financial corporations are finance and leasing companies, money lenders, insurance corporations, pension funds, and foreign exchange companies.
+
+Private sector development and investment - tapping private sector initiative and investment for socially useful purposes - are critical for poverty reduction. In parallel with public sector efforts, private investment, especially in competitive markets, has tremendous potential to contribute to growth. Private markets are the engine of productivity growth, creating productive jobs and higher incomes. And with government playing a complementary role of regulation, funding, and service provision, private initiative and investment can help provide the basic services and conditions that empower poor people - by improving health, education, and infrastructure.
+
+Credit to the private sector may sometimes include credit to state-owned or partially state-owned enterprises.
+
+```{r, credit}
+
+# Goods and services expense (% of expense)
+
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Domestic credit to private sector (% of GDP)" & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Domestic credit to private sector (% of GDP)")
+```
+
+```{r}
+md %>% filter(`Series Name`=="Domestic credit to private sector (% of GDP)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Domestic credit to private sector (% of GDP)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Domestic credit to private sector (% of GDP)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Domestic credit to private sector (% of GDP)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Domestic credit to private sector (% of GDP)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Domestic credit to private sector (% of GDP)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Domestic credit to private sector (% of GDP)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+## Domestic credit to private sector by banks (% of GDP)
+
+Domestic credit to private sector by banks refers to financial resources provided to the private sector by other depository corporations (deposit taking corporations except central banks), such as through loans, purchases of nonequity securities, and trade credits and other accounts receivable, that establish a claim for repayment. For some countries these claims include credit to public enterprises.
+
+Credit is an important link in money transmission; it finances production, consumption, and capital formation, which in turn affect economic activity. The data on domestic credit provided to the private sector by banks are taken from the other depository corporations survey (line 22D) of the International Monetary Fund's (IMF) International Financial Statistics. The other depository corporations include all deposit taking corporations (deposit money banks) except monetary authorities (the central bank).
+
+Private sector development and investment - tapping private sector initiative and investment for socially useful purposes - are critical for poverty reduction. In parallel with public sector efforts, private investment, especially in competitive markets, has tremendous potential to contribute to growth. Private markets are the engine of productivity growth, creating productive jobs and higher incomes. And with government playing a complementary role of regulation, funding, and service provision, private initiative and investment can help provide the basic services and conditions that empower poor people - by improving health, education, and infrastructure.
+
+Credit to the private sector may sometimes include credit to state-owned or partially state-owned enterprises.
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Domestic credit to private sector by banks (% of GDP)" & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Domestic credit to private sector by banks (% of GDP)")
+```
+
+```{r}
+md %>% filter(`Series Name`=="Domestic credit to private sector by banks (% of GDP)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Domestic credit to private sector by banks (% of GDP)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Domestic credit to private sector by banks (% of GDP)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Domestic credit to private sector by banks (% of GDP)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Domestic credit to private sector by banks (% of GDP)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Domestic credit to private sector by banks (% of GDP)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Domestic credit to private sector by banks (% of GDP)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+## Exports of goods and services (% of GDP)
+
+Exports of goods and services represent the value of all goods and other market services provided to the rest of the world. They include the value of merchandise, freight, insurance, transport, travel, royalties, license fees, and other services, such as communication, construction, financial, information, business, personal, and government services. They exclude compensation of employees and investment income (formerly called factor services) and transfer payments.
+
+Gross domestic product (GDP) from the expenditure side is made up of household final consumption expenditure, general government final consumption expenditure, gross capital formation (private and public investment in fixed assets, changes in inventories, and net acquisitions of valuables), and net exports (exports minus imports) of goods and services. Such expenditures are recorded in purchaser prices and include net taxes on products.
+
+Because policymakers have tended to focus on fostering the growth of output, and because data on production are easier to collect than data on spending, many countries generate their primary estimate of GDP using the production approach. Moreover, many countries do not estimate all the components of national expenditures but instead derive some of the main aggregates indirectly using GDP (based on the production approach) as the control total.
+
+Data on exports and imports are compiled from customs reports and balance of payments data. Although the data from the payments side provide reasonably reliable records of cross-border transactions, they may not adhere strictly to the appropriate definitions of valuation and timing used in the balance of payments or corresponds to the change-of ownership criterion. This issue has assumed greater significance with the increasing globalization of international business. Neither customs nor balance of payments data usually capture the illegal transactions that occur in many countries. Goods carried by travelers across borders in legal but unreported shuttle trade may further distort trade statistics.
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Exports of goods and services (% of GDP)"  & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Exports of goods and services (% of GDP)")
+```
+
+
+```{r}
+md %>% filter(`Series Name`=="Exports of goods and services (% of GDP)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Exports of goods and services (% of GDP)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Exports of goods and services (% of GDP)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Exports of goods and services (% of GDP)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Exports of goods and services (% of GDP)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Exports of goods and services (% of GDP)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Exports of goods and services (% of GDP)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+## Exports of goods and services (annual % growth)
+
+Annual growth rate of exports of goods and services based on constant local currency. Aggregates are based on constant 2010 U.S. dollars. Exports of goods and services represent the value of all goods and other market services provided to the rest of the world. They include the value of merchandise, freight, insurance, transport, travel, royalties, license fees, and other services, such as communication, construction, financial, information, business, personal, and government services. They exclude compensation of employees and investment income (formerly called factor services) and transfer payments.
+
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Exports of goods and services (annual % growth)" & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Exports of goods and services (annual % growth)")
+```
+
+```{r}
+md %>% filter(`Series Name`=="Exports of goods and services (annual % growth)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Exports of goods and services (annual % growth)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Exports of goods and services (annual % growth)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Exports of goods and services (annual % growth)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Exports of goods and services (annual % growth)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Exports of goods and services (annual % growth)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Exports of goods and services (annual % growth)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+
+## Food exports (% of merchandise exports)
+
+Food comprises the commodities in SITC sections 0 (food and live animals), 1 (beverages and tobacco), and 4 (animal and vegetable oils and fats) and SITC division 22 (oil seeds, oil nuts, and oil kernels).
+
+World Bank staff estimates through the WITS platform from the Comtrade database maintained by the United Nations Statistics Division.
+
+The classification of commodity groups is based on the Standard International Trade Classification (SITC) revision 3.
+
+Previous editions contained data based on the SITC revision 1. Data for earlier years in previous editions may differ because of the change in methodology. Concordance tables are available to convert data reported in one system to another.
+
+Merchandise export shares may not sum to 100 percent because of unclassified trade.
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Food exports (% of merchandise exports)"  & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Food exports (% of merchandise exports)")
+```
+
+
+```{r}
+md %>% filter(`Series Name`=="Food exports (% of merchandise exports)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Food exports (% of merchandise exports)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Food exports (% of merchandise exports)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Food exports (% of merchandise exports)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Food exports (% of merchandise exports)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Food exports (% of merchandise exports)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Food exports (% of merchandise exports)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+## Food imports (% of merchandise imports)
+
+Merchandise import shares may not sum to 100 percent because of unclassified trade.
+
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Food imports (% of merchandise imports)" & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Food imports (% of merchandise imports)")
+```
+
+
+```{r}
+md %>% filter(`Series Name`=="Food imports (% of merchandise imports)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Food imports (% of merchandise imports)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Food imports (% of merchandise imports)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Food imports (% of merchandise imports)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Food imports (% of merchandise imports)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Food imports (% of merchandise imports)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Food imports (% of merchandise imports)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+## Final consumption expenditure (% of GDP)
+
+Final consumption expenditure (formerly total consumption) is the sum of household final consumption expenditure (private consumption) and general government final consumption expenditure (general government consumption). This estimate includes any statistical discrepancy in the use of resources relative to the supply of resources.
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Final consumption expenditure (% of GDP)" & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Final consumption expenditure (% of GDP)")
+```
+
+
+```{r}
+md %>% filter(`Series Name`=="Final consumption expenditure (% of GDP)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Final consumption expenditure (% of GDP)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Final consumption expenditure (% of GDP)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Final consumption expenditure (% of GDP)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Final consumption expenditure (% of GDP)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Final consumption expenditure (% of GDP)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Final consumption expenditure (% of GDP)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+## Final consumption expenditure (annual % growth)
+
+Average annual growth of final consumption expenditure based on constant local currency. Aggregates are based on constant 2010 U.S. dollars. Final consumption expenditure (formerly total consumption) is the sum of household final consumption expenditure (formerly private consumption) and general government final consumption expenditure (formerly general government consumption). This estimate includes any statistical discrepancy in the use of resources relative to the supply of resources.
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Final consumption expenditure (annual % growth)" & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Final consumption expenditure (annual % growth)")
+```
+
+
+```{r}
+md %>% filter(`Series Name`=="Final consumption expenditure (annual % growth)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Final consumption expenditure (annual % growth)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Final consumption expenditure (annual % growth)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
+
+```{r warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Final consumption expenditure (annual % growth)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia" & !is.na(md$value)))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Final consumption expenditure (annual % growth)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+
+```{r ,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
+
+ggplot(data=md%>%filter(`Series Name`=="Final consumption expenditure (annual % growth)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia") & !is.na(md$value))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Final consumption expenditure (annual % growth)",x="Time") + theme_bw(base_size = 10)+scale_x_continuous(limits = c(0, 16))
+#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
+```
+
+
+## Foreign direct investment, net inflows (% of GDP)
+
+Foreign direct investment are the net inflows of investment to acquire a lasting management interest (10 percent or more of voting stock) in an enterprise operating in an economy other than that of the investor. It is the sum of equity capital, reinvestment of earnings, other long-term capital, and short-term capital as shown in the balance of payments. This series shows net inflows (new investment inflows less disinvestment) in the reporting economy from foreign investors, and is divided by GDP.
+
+Data on equity flows are based on balance of payments data reported by the International Monetary Fund (IMF). Foreign direct investment (FDI) data are supplemented by the World Bank staff estimates using data from the United Nations Conference on Trade and Development (UNCTAD) and official national sources.
+
+The internationally accepted definition of FDI (from the sixth edition of the IMF's Balance of Payments Manual [2009]), includes the following components: equity investment, including investment associated with equity that gives rise to control or influence; investment in indirectly influenced or controlled enterprises; investment in fellow enterprises; debt (except selected debt); and reverse investment. The Framework for Direct Investment Relationships provides criteria for determining whether cross-border ownership results in a direct investment relationship, based on control and influence. Distinguished from other kinds of international investment, FDI is made to establish a lasting interest in or effective management control over an enterprise in another country. A lasting interest in an investment enterprise typically involves establishing warehouses, manufacturing facilities, and other permanent or long-term organizations abroad. Direct investments may take the form of greenfield investment, where the investor starts a new venture in a foreign country by constructing new operational facilities; joint venture, where the investor enters into a partnership agreement with a company abroad to establish a new enterprise; or merger and acquisition, where the investor acquires an existing enterprise abroad. The IMF suggests that investments should account for at least 10 percent of voting stock to be counted as FDI. In practice many countries set a higher threshold. Many countries fail to report reinvested earnings, and the definition of long-term loans differs among countries. BoP refers to Balance of Payments.
+
+FDI data do not give a complete picture of international investment in an economy. Balance of payments data on FDI do not include capital raised locally, an important source of investment financing in some developing countries. In addition, FDI data omit nonequity cross-border transactions such as intra-unit flows of goods and services.
+
+The volume of global private financial flows reported by the World Bank generally differs from that reported by other sources because of differences in sources, classification of economies, and method used to adjust and disaggregate reported information. In addition, particularly for debt financing, differences may also reflect how some installments of the transactions and certain offshore issuances are treated.
+
+Data on equity flows are shown for all countries for which data are available.
+
+**Note: Data starting from 2005 are based on the sixth edition of the IMF's Balance of Payments Manual (BPM6).**
+
+```{r}
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Foreign direct investment, net inflows (% of GDP)" & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(sd(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Foreign direct investment, net inflows (% of GDP)")
 ```
 
 \newpage
@@ -1078,7 +1372,7 @@ When interpreting ASPIRE performance indicators based on household surveys, it i
 knitr::kable(statis%>%filter(`Series Name`=="Benefit incidence of social insurance programs to poorest quintile (% of total social insurance benefits)"&!is.na(Mean)) %>% mutate(Mean=prettyNum(Mean,big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(SD,big.mark=",",scientific=FALSE,digits=2)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Benefit incidence (% of total social insurance benefits)")
 ```
 
-```{r benefitsinsurancegraph, echo=FALSE,warning=FALSE}
+```{r echo=FALSE,warning=FALSE}
 md %>% filter(`Series Name`=="Benefit incidence of social insurance programs to poorest quintile (% of total social insurance benefits)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Ben Inc of Soc Ins Prog to poorest quintile") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Benefit incidence of social insurance programs to poorest quintile (% of total social insurance benefits)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
 ```
 
@@ -1088,13 +1382,38 @@ ggplot(data=md%>%filter(`Series Name`=="Benefit incidence of social insurance pr
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
 ```
 
+## Ease of doing business index (1=most business-friendly regulations)
+
+Ease of doing business ranks economies from 1 to 190, with first place being the best. A high ranking (a low numerical rank) means that the **regulatory environment** is conducive to business operation. The index averages the country's percentile rankings on 10 topics covered in the World Bank's Doing Business. The ranking on each topic is the simple average of the percentile rankings on its component indicators.
+
+Data are collected by the World Bank with a standardized survey that uses a simple business case to ensure comparability across economies and over time - with assumptions about the legal form of the business, its size, its location, and nature of its operation. Surveys are administered through more than 9,000 local experts, including lawyers, business consultants, accountants, freight forwarders, government officials, and other professionals who routinely administer or advise on legal and regulatory requirements.
+
+The economic health of a country is measured not only in macroeconomic terms but also by other factors that shape daily economic activity such as laws, regulations, and institutional arrangements. The data measure business regulation, gauge regulatory outcomes, and measure the extent of legal protection of property, the flexibility of employment regulation, and the tax burden on businesses.
+
+The fundamental premise of this data is that economic activity requires good rules and regulations that are efficient, accessible to all who need to use them, and simple to implement. Thus sometimes there is more emphasis on more regulation, such as stricter disclosure requirements in related-party transactions, and other times emphasis is on for simplified regulations, such as a one-stop shop for completing business startup formalities.
+
+Entrepreneurs may not be aware of all required procedures or may avoid legally required procedures altogether. But where regulation is particularly onerous, levels of informality are higher, which comes at a cost: firms in the informal sector usually grow more slowly, have less access to credit, and employ fewer workers - and those workers remain outside the protections of labor law. The indicator can help policymakers understand the business environment in a country and - along with information from other sources such as the World Bank's Enterprise Surveys - provide insights into potential areas of reform.
+The Doing Business methodology has limitations that should be considered when interpreting the data. First, the data collected refer to businesses in the economy's largest city and may not represent regulations in other locations of the economy. To address this limitation, subnational indicators are being collected for selected economies. These subnational studies point to significant differences in the speed of reform and the ease of doing business across cities in the same economy. Second, the data often focus on a specific business form - generally a limited liability company of a specified size - and may not represent regulation for other types of businesses such as sole proprietorships. Third, transactions described in a standardized business case refer to a specific set of issues and may not represent the full set of issues a business encounters. Fourth, the time measures involve an element of judgment by the expert respondents. When sources indicate different estimates, the Doing Business time indicators represent the median values of several responses given under the assumptions of the standardized case. Fifth, the methodology assumes that a business has full information on what is required and does not waste time when completing procedures.
+
+Data are presented for the survey year instead of publication year. Data before 2013 are not comparable with data from 2013 onward due to methodological changes.
+
+```{r, easetodobusinessafter_2013}
+
+# Goods and services expense (% of expense)
+
+knitr::kable(md%>%mutate(fecha=as.integer(Time))%>%filter(`Series Name`=="Ease of doing business index (1=most business-friendly regulations)" & fecha >=2013 & !is.na(value) )%>%group_by(`Country Name`, Continent)%>%dplyr::summarise(Mean=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(mean(value,na.rm = TRUE),big.mark=",",scientific=FALSE,digits=2))%>% ungroup() %>%select(-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Ease of doing business index (1=most business-friendly regulations)")
+```
+
+
+```{r benefitsinsurancegraph, echo=FALSE,warning=FALSE}
+md %>% filter(`Series Name`=="Ease of doing business index (1=most business-friendly regulations)" & !is.na(md$value)) %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Index (1=most business-friendly regulations)") + theme_bw(base_size = 10)+ theme(axis.text.x = element_text(angle = 90, hjust = 1))  + geom_hline(yintercept=md %>% filter(`Series Name`=="Ease of doing business index (1=most business-friendly regulations)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
+```
+
 # Health
 
 ## Domestic general government health expenditure (% of GDP)
 
 Share of current health expenditures funded from domestic public sources for health.  Domestic public sources include domestic revenue as internal transfers and grants, transfers, subsidies to voluntary health insurance beneficiaries, non-profit institutions serving households (NPISH) or enterprise financing schemes as well as compulsory prepayment and social health insurance contributions. They do not include external resources spent by governments on health.
-
-## Statistical concept and methodology
 
 The health expenditure estimates have been prepared by the World Health Organization under the framework of the System of Health Accounts 2011 (SHA 2011).  The Health SHA 2011 tracks all health spending in a given country over a defined period of time regardless of the entity or institution that financed and managed that spending. It generates consistent and comprehensive data on health spending in a country, which in turn can contribute to evidence-based policy-making.
 
@@ -1106,7 +1425,7 @@ knitr::kable(statis%>%filter(`Series Name`=="Domestic general government health 
 ```
 
 ```{r healthgdpgraph, echo=FALSE,warning=FALSE}
-md %>% filter(`Series Name`=="Domestic general government health expenditure (% of GDP)") %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Domestic Gov Health Exp (% of GDP)",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Domestic general government health expenditure (% of GDP)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
+md %>% filter(`Series Name`=="Domestic general government health expenditure (% of GDP)") %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Domestic Gov Health Exp (% of GDP)",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Domestic general government health expenditure (% of GDP)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red")
 ```
 
 ## Domestic general government health expenditure (% of general government expenditure)
@@ -1125,9 +1444,8 @@ knitr::kable(statis%>%filter(`Series Name`=="Domestic general government health 
 
 
 ```{r healthexpensegraph, echo=FALSE,warning=FALSE}
-md %>% filter(`Series Name`=="Domestic general government health expenditure (% of general government expenditure)") %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Domestic Gov Health Exp (% Gov Exp)",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Domestic general government health expenditure (% of general government expenditure)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
+md %>% filter(`Series Name`=="Domestic general government health expenditure (% of general government expenditure)") %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Domestic Gov Health Exp (% Gov Exp)",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Domestic general government health expenditure (% of general government expenditure)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") 
 ```
-
 ## Births attended by skilled health staff (% of total)
 
 Births attended by skilled health staff are the percentage of deliveries attended by personnel trained to give the necessary supervision, care, and advice to women during pregnancy, labor, and the postpartum period; to conduct deliveries on their own; and to care for newborns.
@@ -1163,6 +1481,7 @@ knitr::kable(statis%>%filter(`Series Name`=="Hospital beds (per 1,000 people)") 
 
 
 
+
 ```{r bed1000graph, echo=FALSE,warning=FALSE}
 md %>% filter(`Series Name`=="Hospital beds (per 1,000 people)") %>% ggplot(aes(x= `Country Code`,y=value, fill=Continent)) +  geom_boxplot() + geom_jitter(width=0.1,alpha=0.2) + labs(y="Hospital beds (per 1,000 people)",x="Country Code") + theme_bw(base_size = 8)  + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + geom_hline(yintercept=md %>% filter(`Series Name`=="Hospital beds (per 1,000 people)")%>%select(value)%>%group_by()%>%summarise(n=mean(value,na.rm=TRUE))%>%as.double(), linetype="dashed", color = "red") #
 ```
@@ -1176,10 +1495,11 @@ md %>% filter(`Series Name`=="Hospital beds (per 1,000 people)") %>% ggplot(aes(
 knitr::kable(statis%>%filter(`Series Name`=="Population, total") %>% mutate(Mean=prettyNum(Mean,big.mark=",",scientific=FALSE,digits=0),SD=prettyNum(SD,big.mark=",",scientific=FALSE,digits=0)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Population, total")
 ```
 
+
+
 ```{r populationgraph,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
 ggplot(data=md%>%filter(`Series Name`=="Population, total" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) + labs(y="Population",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
-#+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
 ```
 
 ```{r population_graph_aggr,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
@@ -1203,17 +1523,23 @@ knitr::kable(inner_join(male,female,by=c("Country Name")), align = c('l','c','c'
 knitr::kable(statis%>%filter(`Series Name`=="Life expectancy at birth, total (years)") %>% mutate(Mean=prettyNum(Mean,big.mark=",",scientific=FALSE,digits=0),SD=prettyNum(SD,big.mark=",",scientific=FALSE,digits=0)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`), align = c('l','c','c'), caption = "Life expectancy at birth (years)")
 ```
 
+
+
 ```{r lifeexpectancygraph,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
 ggplot(data=md%>%filter(`Series Name`=="Life expectancy at birth, total (years)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Life expectancy at birth (years)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))+scale_y_continuous(labels = scales::comma)
 ```
 
+
+
 ```{r lifeexpectancy_graph_aggr,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
 ggplot(data=md%>%filter(`Series Name`=="Life expectancy at birth, total (years)" & (`Country Name` =="United States" | `Country Name` =="China" | `Country Name` =="Japan" | `Country Name` =="European Union" | `Country Name` =="Latin America & Caribbean" | `Country Name` =="Middle East & North Africa" | `Country Name` =="OECD members" | `Country Name` =="South Asia (IDA & IBRD)" | `Country Name` =="World" | `Country Name` =="Sub-Saharan Africa" | `Country Name` =="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = 1)+facet_wrap(~`Country Name`, scales = "free",nrow=4)+scale_y_continuous(labels = scales::comma) + labs(y="Life expectancy at birth (years)",x="Time") + theme_bw(base_size = 8)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))
 ```
+
+
 
 ## Fertility rate, total (births per woman)
 
@@ -1222,11 +1548,15 @@ ggplot(data=md%>%filter(`Series Name`=="Life expectancy at birth, total (years)"
 knitr::kable(statis%>%filter(`Series Name`=="Fertility rate, total (births per woman)") %>% mutate(Mean=prettyNum(Mean,big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(SD,big.mark=",",scientific=FALSE,digits=2)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Fertility rate (births per woman)")
 ```
 
+
+
 ```{r fertilityrategraph,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
 ggplot(data=md%>%filter(`Series Name`=="Fertility rate, total (births per woman)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) + labs(y="Fertility rate (births per woman)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))+scale_y_continuous(labels = scales::comma)
 ```
+
+
 
 ```{r fertilityrate_graph_aggr,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
@@ -1245,11 +1575,15 @@ Dependency ratios capture variations in the proportions of children, elderly peo
 knitr::kable(statis%>%filter(`Series Name`=="Age dependency ratio, old (% of working-age population)") %>% mutate(Mean=prettyNum(Mean,big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(SD,big.mark=",",scientific=FALSE,digits=2)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Age dependency ratio, old (% of working-age population)")
 ```
 
+
+
 ```{r agedependencyrateoldgraph,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
 ggplot(data=md%>%filter(`Series Name`=="Age dependency ratio, old (% of working-age population)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Age dependency ratio, old (% of working-age population)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))+scale_y_continuous(labels = scales::comma)
 ```
+
+
 
 ```{r gedependencyrateold_graph_aggr,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
@@ -1267,11 +1601,15 @@ Age dependency ratio, young, is the ratio of younger dependents--people younger 
 knitr::kable(statis%>%filter(`Series Name`=="Age dependency ratio, young (% of working-age population)") %>% mutate(Mean=prettyNum(Mean,big.mark=",",scientific=FALSE,digits=2),SD=prettyNum(SD,big.mark=",",scientific=FALSE,digits=2)) %>% ungroup() %>%select(-`Series Name`,-Continent)%>%arrange(`Country Name`), align = c('l','r','r'), caption = "Age dependency ratio, young (% of working-age population)")
 ```
 
+
+
 ```{r agedependencyrateyounggraph,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
 ggplot(data=md%>%filter(`Series Name`=="Age dependency ratio, young (% of working-age population)" & (`Country Name` !="European Union" & `Country Name` !="Latin America & Caribbean" & `Country Name` !="Middle East & North Africa" & `Country Name` !="OECD members" & `Country Name` !="South Asia (IDA & IBRD)"& `Country Name` !="World"& `Country Name` !="Sub-Saharan Africa"& `Country Name` !="South Asia"))%>% mutate(Time=(as.integer(Time)-2000)),aes(x=Time,y=value))+geom_smooth(size = .5)+geom_point(mapping = aes(color=Continent),size = .5)+facet_wrap(~`Country Name`, scales = "free",nrow=5)+scale_y_continuous(labels = scales::comma) + labs(y="Age dependency ratio, young (% of working-age population)",x="Time") + theme_bw(base_size = 5)+scale_x_continuous(limits = c(0, 16))
 #+ ggtitle(expression(atop("Relacion Edad vs. Puntos Promedio por Cuenta", atop(italic("Todos los paises y todos los productos bancarios"), ""))))+scale_y_continuous(labels = scales::comma)
 ```
+
+
 
 ```{r gedependencyrateyoung_graph_aggr,warning=FALSE,results='hide',message=FALSE,fig.keep='all'}
 
