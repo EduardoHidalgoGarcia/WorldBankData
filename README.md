@@ -1,1 +1,1 @@
-This repo contains the results from a study I performed with World Bank's data to better understand development and growth accross countries. 
+Neste repositorio podes encontrar os documentos que utilizaremos para o curso: "Criação de Dashboard"
