@@ -1,1 +1,1 @@
-Neste repositorio podes encontrar os documentos que utilizaremos para o curso: "Criação de Dashboard"
+Neste repositorio podes encontrar os documentos que utilizaremos para o workshop: "Criação de Dashboard"
